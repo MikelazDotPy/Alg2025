@@ -3,6 +3,9 @@
 
 #define MAX_ASSESMENT 44
 #define MAX_N 40
+#define ASSESSMENT_MISTAKE 3
+#define ASSESSMENTS_COUNT 6
+#define ASSESSMENT_ARR {N + 4, N / 2 + 7, N / 3 + 9, N / 4 + 10, N / 5 + 11, N / 6 + 12}
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -50,11 +53,11 @@ int get_best_limit(size_t N, size_t* best_side, size_t* is_prime){
     *is_prime = 1;
     *best_side = N / 2 + 1;
 
-    size_t assessments[6] = {N + 4, N / 2 + 7, N / 3 + 9, N / 4 + 10, N / 5 + 11, N / 6 + 12};
+    size_t assessments[ASSESSMENTS_COUNT] = ASSESSMENT_ARR;
     size_t assessment = assessments[0];
-    for (size_t i = 1; i < 6; ++i)
+    for (size_t i = 1; i < ASSESSMENTS_COUNT; ++i)
         assessment = MIN(assessment, assessments[i]); 
-    return MAX(assessment - 3, 6);
+    return assessment - ASSESSMENT_MISTAKE;
 }
 
 
@@ -85,22 +88,25 @@ void solution(int N){
     size_t best_side, is_prime;
     size_t limit = get_best_limit(N, &best_side, &is_prime);
     info_t info = {N, N*N, (2 << (best_side - 1)) - 1, best_side};
+
+    size_t init_square = best_side*best_side + 2*(N - best_side)*(N - best_side);
+    size_t init_conditions_side = 2*best_side - N;
+    size_t init_conditions = GET_SQUARE_ROW(info, 0, init_conditions_side);
     square_t pants[3] = {
         (square_t){0, 0, best_side},
         (square_t){0, best_side, N - best_side},
         (square_t){best_side, 0, N - best_side}
     };
-    size_t init_square = best_side*best_side + 2*(N - best_side)*(N - best_side);
-    size_t init_conditions = 2*best_side - N;
-    size_t side_assessment = (N - best_side) + 1;
+
     while (1){
         combination_t* stack = calloc(N*N, sizeof(combination_t));
         for (size_t i = 0; i < 3; ++i)
             stack[0].squares[i] = pants[i];
-        for (size_t y = 0; y < init_conditions; ++y)
-            stack[0].matrix[y] |= GET_SQUARE_ROW(info, 0, init_conditions);
+        for (size_t y = 0; y < init_conditions_side; ++y)
+            stack[0].matrix[y] |= init_conditions;
         stack[0].len = 3;
         stack[0].curr_square = init_square;
+
         int top = 0;
         while (top >= 0){
             combination_t curr_comb = stack[top--];
@@ -113,16 +119,15 @@ void solution(int N){
                 continue;
 
             combination_t comb = curr_comb;
-            size_t max_square = info.square - comb.curr_square;
-            for (int y = 0; y <= info.n - 1; ++y){
-                for (int x = 0; x <= info.n - 1; ++x){
-                    for (size_t side = side_assessment; side > 0; --side){
-                        if (x + side <= info.n && y + side <= info.n && can_place(curr_comb.matrix[y], info, x, side)){
-                            for (size_t s = 1; s <= side; ++s){
-                                comb.squares[comb.len++] = (square_t){x, y, s};
-                                comb.curr_square += s*s;
-                                for (size_t i = y; i < s + y; ++i)
-                                    comb.matrix[i] |= GET_SQUARE_ROW(info, x, s);
+            for (size_t y = 0; y < info.n; ++y){
+                for (size_t x = 0; x < info.n; ++x){
+                    for (size_t max_side = info.n - MAX(x, y); max_side > 0; --max_side){
+                        if (can_place(curr_comb.matrix[y], info, x, max_side)){
+                            for (size_t side = 1; side <= max_side; ++side){
+                                comb.squares[comb.len++] = (square_t){x, y, side};
+                                comb.curr_square += side*side;
+                                for (size_t i = y; i < side + y; ++i)
+                                    comb.matrix[i] |= GET_SQUARE_ROW(info, x, side);
                                 stack[++top] = comb;
                                 comb = curr_comb;
                             }
