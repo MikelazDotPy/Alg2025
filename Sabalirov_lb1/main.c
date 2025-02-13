@@ -9,6 +9,7 @@
 
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define INIT_FOR(y1, y2, x) (y1 == y2 ? x : 0)
 #define GET_SQUARE_ROW(info, x, side) (((info.R >> (info.n - side)) << (info.n - x - side)))
 
 
@@ -30,6 +31,8 @@ typedef struct {
     size_t matrix[MAX_N];
     square_t squares[MAX_ASSESMENT];
     size_t len;
+    size_t next_x;
+    size_t next_y;
 } combination_t;
 
 
@@ -88,7 +91,6 @@ void solution(int N){
     size_t best_side, is_prime;
     size_t limit = get_best_limit(N, &best_side, &is_prime);
     info_t info = {N, N*N, (2 << (best_side - 1)) - 1, best_side};
-
     size_t init_square = best_side*best_side + 2*(N - best_side)*(N - best_side);
     size_t init_conditions_side = 2*best_side - N;
     size_t init_conditions = GET_SQUARE_ROW(info, 0, init_conditions_side);
@@ -106,6 +108,8 @@ void solution(int N){
             stack[0].matrix[y] |= init_conditions;
         stack[0].len = 3;
         stack[0].curr_square = init_square;
+        stack[0].next_x = 0;
+        stack[0].next_y = 0;
 
         int top = 0;
         while (top >= 0){
@@ -119,15 +123,17 @@ void solution(int N){
                 continue;
 
             combination_t comb = curr_comb;
-            for (size_t y = 0; y < info.n; ++y){
-                for (size_t x = 0; x < info.n; ++x){
-                    for (size_t max_side = info.n - MAX(x, y); max_side > 0; --max_side){
+            for (size_t y = comb.next_y; y < info.n; ++y){
+                for (size_t x = INIT_FOR(y, comb.next_y, comb.next_x); x < info.n; ++x){
+                    for (int max_side = (int)info.n - (int)MAX(x, y); max_side > 0; --max_side){
                         if (can_place(curr_comb.matrix[y], info, x, max_side)){
                             for (size_t side = 1; side <= max_side; ++side){
                                 comb.squares[comb.len++] = (square_t){x, y, side};
                                 comb.curr_square += side*side;
                                 for (size_t i = y; i < side + y; ++i)
                                     comb.matrix[i] |= GET_SQUARE_ROW(info, x, side);
+                                comb.next_x = x + 1;
+                                comb.next_y = y;
                                 stack[++top] = comb;
                                 comb = curr_comb;
                             }
