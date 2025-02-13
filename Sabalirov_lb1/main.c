@@ -36,7 +36,7 @@ typedef struct {
 } combination_t;
 
 
-int get_best_limit(size_t N, size_t* best_side, size_t* is_prime){
+size_t get_best_limit(size_t N, size_t* best_side, size_t* is_prime){
     *is_prime = 0;
 
     if (N % 2 == 0){
@@ -87,7 +87,7 @@ void output_solution(square_t* squares, size_t len, size_t delta_n){
 }
 
 
-void solution(int N){
+void solution(size_t N){
     size_t best_side, is_prime;
     size_t limit = get_best_limit(N, &best_side, &is_prime);
     info_t info = {N, N*N, (2 << (best_side - 1)) - 1, best_side};
@@ -125,7 +125,7 @@ void solution(int N){
             combination_t comb = curr_comb;
             for (size_t y = comb.next_y; y < info.n; ++y){
                 for (size_t x = INIT_FOR(y, comb.next_y, comb.next_x); x < info.n; ++x){
-                    for (int max_side = (int)info.n - (int)MAX(x, y); max_side > 0; --max_side){
+                    for (size_t max_side = info.n - MAX(x, y); max_side > 0; --max_side){
                         if (can_place(curr_comb.matrix[y], info, x, max_side)){
                             for (size_t side = 1; side <= max_side; ++side){
                                 comb.squares[comb.len++] = (square_t){x, y, side};
