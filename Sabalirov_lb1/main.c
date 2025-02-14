@@ -142,6 +142,8 @@ void solution(const size_t N){
             }
 
             if (curr_comb.len == limit){
+                if (DEBUG)
+                    printf("Комбинация номер %ld: Длина %ld. Площадь %ld Достигла максимальной длины. Отсечение частичтиного решения\n", it, curr_comb.len, curr_comb.curr_square);
                 continue;
             }
 
