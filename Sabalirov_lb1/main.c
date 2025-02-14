@@ -132,7 +132,7 @@ void solution(const size_t N){
             if (DEBUG)
                 ++it;
             curr_comb = stack[top--];
-            if (DEBUG && it % 10000 == 0)
+            if (DEBUG)
                 printf("Проверка комбинации номер %ld: Длина %ld. Площадь %ld \n", it, curr_comb.len, curr_comb.curr_square);
             if (curr_comb.curr_square == info.square){
                 if (DEBUG)
@@ -149,12 +149,16 @@ void solution(const size_t N){
             for (size_t y = comb.next_y; y < info.n; ++y){
                 for (size_t x = INIT_FOR(y, comb.next_y, comb.next_x); x < info.n; ++x){
                     for (size_t max_side = info.n - MAX(x, y); max_side > 0; --max_side){
-                        if (DEBUG)
+                        if (DEBUG){
                             all_it++;
+                            printf("Проверка точки %ld %ld с длиной стороны %ld\n", x, y, max_side);
+                        }
                         if (can_place(curr_comb.matrix[y], info, x, max_side)){
                             for (size_t side = 1; side <= max_side; ++side){
-                                if (DEBUG)
+                                if (DEBUG){
                                     all_it++;
+                                    printf("Создание дочернего решения в точке %ld %ld с длиной стороны %ld\n", x, y, side);
+                                }
                                 comb.squares[comb.len++] = (square_t){x, y, side};
                                 comb.curr_square += side*side;
                                 square = GET_SQUARE_ROW(info, x, side);
@@ -185,8 +189,8 @@ int main(){
     size_t N;
     scanf("%ld", &N);  
 
-    clock_t t = clock(); 
-
+    clock_t t = clock();
+    
     solution(N); 
 
     t = clock() - t; 
