@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 
-DEBUG = False
+DEBUG = True
 
 
 class Vertex:
@@ -200,10 +200,11 @@ def main() -> None:
             if DEBUG:
                 print(f"Найдено вхождение подстроки '{q}' на позиции {include[0]}\n")
 
-            C[include[0] - L[i] + 1] += 1
-
-            if DEBUG:
-                print(f"Обновление массива C: C[{index}] = {C[index]}\n")
+            idx = include[0] - L[i] + 1
+            if idx > 0:
+                C[include[0] - L[i] + 1] += 1
+                if DEBUG:
+                    print(f"Обновление массива C: C[{idx}] = {C[idx]}\n")
 
     if DEBUG:
         print(f"Массив C после обработки всех подстрок: {C}\n")
@@ -211,21 +212,18 @@ def main() -> None:
     idxs = set(map(lambda x: x - 1, L))
     if DEBUG:
         print(f"Множество индексов для проверки: {idxs}\n")
-
+    batmans = set([i for i, x in enumerate(T) if x == batman])
+    black_list = batmans - idxs
     for i in range(1, len(C)):
         if C[i] == len(Q) and i + len(P) - 1 <= len(T):
             if DEBUG:
                 print(f"Проверка позиции {i} на соответствие всем подстрокам\n")
-
-            for j, x in enumerate(T[i - 1: i - 1 + len(P)]):
-                if j not in idxs and x == batman:
-                    if DEBUG:
-                        print(f"Найден символ '{batman}' на позиции {j}, который нарушает условие\n")
-                    break
-            else:
+            if len(set(range(i - 1, i - 1 + len(P))) & black_list) == 0:
                 if DEBUG:
                     print(f"Позиция {i} удовлетворяет всем условиям\n")
                 print(i)
+            elif DEBUG:
+                print(f"Найден символ '{batman}' в слове {P[i - 1: i - 1 + len(P)]}, который нарушает условие\n")
 
 
 if __name__ == "__main__":

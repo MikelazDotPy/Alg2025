@@ -186,11 +186,12 @@ def main() -> None:
         for include in vertex.find(T):
             if DEBUG:
                 print(f"Найдено вхождение подстроки '{q}' на позиции {include[0]}\n")
-            index = include[0] - L[i] + 1
-            if 0 <= index < len(C):
-                C[index] += 1
+
+            idx = include[0] - L[i] + 1
+            if idx > 0:
+                C[include[0] - L[i] + 1] += 1
                 if DEBUG:
-                    print(f"Обновление массива C: C[{index}] = {C[index]}\n")
+                    print(f"Обновление массива C: C[{idx}] = {C[idx]}\n")
     if DEBUG:
         print(f"Массив C после обработки всех подстрок: {C}\n")
     for i in range(1, len(C)):
